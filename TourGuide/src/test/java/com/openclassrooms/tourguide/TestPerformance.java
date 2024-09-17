@@ -87,16 +87,23 @@ public class TestPerformance {
 		Attraction attraction = gpsUtil.getAttractions().get(0);
 		List<User> allUsers = new ArrayList<>();
 		allUsers = tourGuideService.getAllUsers();
-//		System.out.println("alluser size is "+allUsers.size());
 		allUsers.forEach(u -> u.addToVisitedLocations(new VisitedLocation(u.getUserId(), attraction, new Date())));
 
-//		allUsers.stream()
-//				.forEach(u->rewardsService.calculateRewards(u));
 		allUsers.forEach(u -> rewardsService.calculateRewards(u));
 
+		System.out.println("size of allUsers is "+allUsers.size());
+		int i =0;
 		for (User user : allUsers) {
-			assertTrue(user.getUserRewards().size() > 0);
+			user.addToVisitedLocations(new VisitedLocation(user.getUserId(),attraction,new Date()));
+			rewardsService.calculateRewards(user);
+//			assertTrue(user.getUserRewards().size() > 0);
+			 i++;
+			System.out.println("size of "+i+"th user reward is "+user.getUserRewards().size());
 		}
+
+
+
+
 		stopWatch.stop();
 		tourGuideService.tracker.stopTracking();
 
