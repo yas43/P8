@@ -91,14 +91,14 @@ public class TestPerformance {
 
 		allUsers.forEach(u -> rewardsService.calculateRewards(u));
 
-		System.out.println("size of allUsers is "+allUsers.size());
-		int i =0;
+//		System.out.println("size of allUsers is "+allUsers.size());
+//		int i =0;
 		for (User user : allUsers) {
-			user.addToVisitedLocations(new VisitedLocation(user.getUserId(),attraction,new Date()));
-			rewardsService.calculateRewards(user);
-//			assertTrue(user.getUserRewards().size() > 0);
-			 i++;
-			System.out.println("size of "+i+"th user reward is "+user.getUserRewards().size());
+//			user.addToVisitedLocations(new VisitedLocation(user.getUserId(),attraction,new Date()));
+//			rewardsService.calculateRewards(user);
+			assertTrue(user.getUserRewards().size() > 0);
+//			 i++;
+//			System.out.println("size of "+i+"th user reward is "+user.getUserRewards().size());
 		}
 
 

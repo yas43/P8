@@ -131,6 +131,7 @@ public class TourGuideService {
 			String email = userName + "@tourGuide.com";
 			User user = new User(UUID.randomUUID(), userName, phone, email);
 			generateUserLocationHistory(user);
+			generateRandomUserReward(user);
 
 			internalUserMap.put(userName, user);
 		});
@@ -159,6 +160,35 @@ public class TourGuideService {
 	private Date getRandomTime() {
 		LocalDateTime localDateTime = LocalDateTime.now().minusDays(new Random().nextInt(30));
 		return Date.from(localDateTime.toInstant(ZoneOffset.UTC));
+	}
+
+	private Attraction generateRandomAttraction() {
+	List<Attraction> attractionsList = gpsUtil.getAttractions();
+		Random r = new Random();
+		int low = 0;
+		int high = 26;
+		int random = r.nextInt(high-low) + low;
+
+		return attractionsList.get(random);
+	}
+
+
+	private int generateRandomRewardPoint(){
+		Random r = new Random();
+		int low = 1;
+		int high = 10;
+		int random = r.nextInt(high-low) + low;
+
+		return random;
+	}
+
+	private void generateRandomUserReward(User user) {
+		IntStream.range(0, 3).forEach(i -> {
+			user.addUserReward(new UserReward(new VisitedLocation(user.getUserId(),
+					new Location(generateRandomLatitude(), generateRandomLongitude()), getRandomTime())
+					,generateRandomAttraction(),
+					generateRandomRewardPoint()));
+		});
 	}
 
 }
