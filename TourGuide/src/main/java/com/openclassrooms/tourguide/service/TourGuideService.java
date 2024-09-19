@@ -131,7 +131,7 @@ public class TourGuideService {
 			String email = userName + "@tourGuide.com";
 			User user = new User(UUID.randomUUID(), userName, phone, email);
 			generateUserLocationHistory(user);
-			generateRandomUserReward(user);
+//			generateRandomUserReward(user);
 
 			internalUserMap.put(userName, user);
 		});

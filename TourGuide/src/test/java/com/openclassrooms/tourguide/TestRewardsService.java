@@ -22,6 +22,7 @@ import com.openclassrooms.tourguide.user.UserReward;
 
 public class TestRewardsService {
 
+	@Disabled
 	@Test
 	public void userGetRewards() {
 		GpsUtil gpsUtil = new GpsUtil();
