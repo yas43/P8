@@ -9,8 +9,8 @@ import gpsUtil.location.Attraction;
 import gpsUtil.location.Location;
 import gpsUtil.location.VisitedLocation;
 import rewardCentral.RewardCentral;
-import com.openclassrooms.tourguide.user.User;
-import com.openclassrooms.tourguide.user.UserReward;
+import com.openclassrooms.tourguide.model.User;
+import com.openclassrooms.tourguide.model.UserReward;
 
 @Service
 public class RewardsService {
@@ -36,19 +36,24 @@ public class RewardsService {
 		proximityBuffer = defaultProximityBuffer;
 	}
 	
-	public void calculateRewards(User user) {
+	public synchronized void calculateRewards(User user) {
 		List<VisitedLocation> userLocations = user.getVisitedLocations();
 		List<Attraction> attractions = gpsUtil.getAttractions();
+//		System.out.println("inside calculate service gpsUtil.getattraction.size is :"+attractions.size());
+//		System.out.println("inside calculate service user.getUserReward.Size befor is "+user.getUserRewards().size());
+//		System.out.println("inside calculate visitedLocations.Size befor is "+user.getVisitedLocations().size());
 
 		for(VisitedLocation visitedLocation : userLocations) {
 			for(Attraction attraction : attractions) {
-				if(user.getUserRewards().stream().filter(r -> !r.attraction.attractionName.equals(attraction.attractionName)).count() == 0) {
+				if(user.getUserRewards().stream().noneMatch(r -> r.attraction.attractionName.equals(attraction.attractionName))) {
 					if(nearAttraction(visitedLocation, attraction)) {
 						user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
+//						System.out.println("inside calculate service user.getUserReward.Size after is "+user.getUserRewards().size());
 					}
 				}
 			}
 		}
+
 
 //		userLocations.stream()
 //				.forEach(visitedLocation -> attractions.stream()

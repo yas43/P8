@@ -1,20 +1,14 @@
 package com.openclassrooms.tourguide.service;
 
 import com.openclassrooms.tourguide.helper.InternalTestHelper;
+import com.openclassrooms.tourguide.model.NearByAttraction;
 import com.openclassrooms.tourguide.tracker.Tracker;
-import com.openclassrooms.tourguide.user.User;
-import com.openclassrooms.tourguide.user.UserReward;
+import com.openclassrooms.tourguide.model.User;
+import com.openclassrooms.tourguide.model.UserReward;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -27,6 +21,7 @@ import gpsUtil.location.Attraction;
 import gpsUtil.location.Location;
 import gpsUtil.location.VisitedLocation;
 
+import rewardCentral.RewardCentral;
 import tripPricer.Provider;
 import tripPricer.TripPricer;
 
@@ -37,12 +32,14 @@ public class TourGuideService {
 	private final RewardsService rewardsService;
 	private final TripPricer tripPricer = new TripPricer();
 	public final Tracker tracker;
+	private final RewardCentral rewardsCentral = new RewardCentral();
 	boolean testMode = true;
 
 	public TourGuideService(GpsUtil gpsUtil, RewardsService rewardsService) {
 		this.gpsUtil = gpsUtil;
 		this.rewardsService = rewardsService;
-		
+
+
 		Locale.setDefault(Locale.US);
 
 		if (testMode) {
@@ -63,6 +60,30 @@ public class TourGuideService {
 		VisitedLocation visitedLocation = (user.getVisitedLocations().size() > 0) ? user.getLastVisitedLocation()
 				: trackUserLocation(user);
 		return visitedLocation;
+	}
+
+	public List<NearByAttraction> getNearByAttraction(User user) {
+		//		VisitedLocation visitedLocation = (user.getVisitedLocations().size() > 0) ? user.getLastVisitedLocation()
+		//				: trackUserLocation(user);
+		//		return visitedLocation;
+
+
+		List<NearByAttraction>attractionListOffer = new LinkedList<>();
+		VisitedLocation lastVisitedLocation = user.getLastVisitedLocation();
+		Map<Attraction,Double> attractionList = gpsUtil.getAttractions().stream()
+				.collect(Collectors.toMap(r->r,r->rewardsService.getDistance(r,lastVisitedLocation.location)));
+		attractionList.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).limit(5)
+				.forEach(r->{
+					NearByAttraction nearByAttraction = new NearByAttraction();
+					nearByAttraction.setTouristAttractionName(r.getKey().attractionName);
+					nearByAttraction.setTouristAttractionLat(r.getKey().latitude);
+					nearByAttraction.setTouristAttractionLong(r.getKey().longitude);
+					nearByAttraction.setDistance(r.getValue());
+					nearByAttraction.setRewardPoint(rewardsCentral.getAttractionRewardPoints(r.getKey().attractionId,user.getUserId()));
+					attractionListOffer.add(nearByAttraction);
+				});
+		return attractionListOffer;
+
 	}
 
 	public User getUser(String userName) {
@@ -97,12 +118,12 @@ public class TourGuideService {
 
 	public List<Attraction> getNearByAttractions(VisitedLocation visitedLocation) {
 		List<Attraction> nearbyAttractions = new ArrayList<>();
-		for (Attraction attraction : gpsUtil.getAttractions()) {
-			if (rewardsService.isWithinAttractionProximity(attraction, visitedLocation.location)) {
-				nearbyAttractions.add(attraction);
-			}
-		}
+		Map<Attraction,Double> map = (Map<Attraction, Double>) gpsUtil.getAttractions().stream()
+				.collect(Collectors.toMap(r->r,r->rewardsService.getDistance(r,visitedLocation.location)));
 
+	 	map.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).limit(5)
+				.forEach(r->nearbyAttractions.add(r.getKey()));
+//				.collect(Collectors.toList());
 		return nearbyAttractions;
 	}
 

@@ -1,6 +1,5 @@
 package com.openclassrooms.tourguide;
 
-import com.openclassrooms.tourguide.user.User;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

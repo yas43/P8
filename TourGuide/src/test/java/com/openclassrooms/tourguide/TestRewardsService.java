@@ -7,7 +7,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import gpsUtil.GpsUtil;
@@ -17,8 +16,9 @@ import rewardCentral.RewardCentral;
 import com.openclassrooms.tourguide.helper.InternalTestHelper;
 import com.openclassrooms.tourguide.service.RewardsService;
 import com.openclassrooms.tourguide.service.TourGuideService;
-import com.openclassrooms.tourguide.user.User;
-import com.openclassrooms.tourguide.user.UserReward;
+import com.openclassrooms.tourguide.model.User;
+import com.openclassrooms.tourguide.model.UserReward;
+import rewardCentral.RewardCentral;
 
 public class TestRewardsService {
 
@@ -57,12 +57,22 @@ public class TestRewardsService {
 
 		InternalTestHelper.setInternalUserNumber(1);
 		TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
+		System.out.println("after  TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);");
+
+//		System.out.println("inside test tourGuideService.getAllUsers is "+tourGuideService.getAllUsers().size());
+//		tourGuideService.getAllUsers().stream().forEach(u-> {
+//			System.out.println("inside est user.getVisitedLocation is: "+u.getVisitedLocations());
+//			System.out.println("inside est user.getUserReward is: "+u.getUserRewards());
+//		});
+
 
 		rewardsService.calculateRewards(tourGuideService.getAllUsers().get(0));
+
 		List<UserReward> userRewards = tourGuideService.getUserRewards(tourGuideService.getAllUsers().get(0));
 		tourGuideService.tracker.stopTracking();
-
-		System.out.println("userrewadsize is "+userRewards.size());
+//		System.out.println("userRewardSize  after tourGuideService.getUserRewards(tourGuideService.getAllUsers().get(0)) is "
+//				+tourGuideService.getAllUsers().get(0).getUserRewards().size());
+//		System.out.println("gpsUtil.getattraction size is "+gpsUtil.getAttractions().size());
 
 		assertEquals(gpsUtil.getAttractions().size(), userRewards.size());
 	}

@@ -2,7 +2,9 @@ package com.openclassrooms.tourguide;
 
 import java.util.List;
 
+import com.openclassrooms.tourguide.model.NearByAttraction;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,8 +13,8 @@ import gpsUtil.location.Attraction;
 import gpsUtil.location.VisitedLocation;
 
 import com.openclassrooms.tourguide.service.TourGuideService;
-import com.openclassrooms.tourguide.user.User;
-import com.openclassrooms.tourguide.user.UserReward;
+import com.openclassrooms.tourguide.model.User;
+import com.openclassrooms.tourguide.model.UserReward;
 
 import tripPricer.Provider;
 
@@ -26,10 +28,11 @@ public class TourGuideController {
     public String index() {
         return "Greetings from TourGuide!";
     }
-    
+
     @RequestMapping("/getLocation") 
-    public VisitedLocation getLocation(@RequestParam String userName) {
-    	return tourGuideService.getUserLocation(getUser(userName));
+    public List<NearByAttraction> getLocation(@RequestParam String userName) {
+//    	return tourGuideService.getUserLocation(getUser(userName));
+        return tourGuideService.getNearByAttraction(getUser(userName));
     }
     
     //  TODO: Change this method to no longer return a List of Attractions.
