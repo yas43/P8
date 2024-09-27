@@ -25,7 +25,11 @@ public class User {
 		this.phoneNumber = phoneNumber;
 		this.emailAddress = emailAddress;
 	}
-	
+
+	public void setUserRewards(CopyOnWriteArrayList<UserReward> userRewards) {
+		this.userRewards = userRewards;
+	}
+
 	public UUID getUserId() {
 		return userId;
 	}
@@ -71,14 +75,9 @@ public class User {
 	}
 	
 	public void addUserReward(UserReward userReward) {
-		if(userRewards.stream().noneMatch(r -> r.attraction.attractionName.equals(userReward.attraction))) {
+		if(userRewards.stream().noneMatch(r -> r.attraction.attractionName.equals(userReward.attraction.attractionName))) {
 			userRewards.add(userReward);
 		}
-
-
-//		userRewards.stream().dropWhile(userReward1 -> userReward1.attraction.attractionName.equals(userReward1.attraction))
-//				.forEach(Reward->userRewards.add(Reward));
-
 	}
 	
 	public CopyOnWriteArrayList<UserReward> getUserRewards() {

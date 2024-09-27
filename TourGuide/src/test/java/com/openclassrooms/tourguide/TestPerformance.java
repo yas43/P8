@@ -98,6 +98,12 @@ public class TestPerformance {
 //		System.out.println("size of allUsers is "+allUsers.size());
 //		int i =0;
 		for (User user : allUsers) {
+			while (user.getUserRewards().isEmpty()) {
+				try {
+					TimeUnit.MILLISECONDS.sleep(200);
+				} catch (InterruptedException e) {
+				}
+			}
 			user.addToVisitedLocations(new VisitedLocation(user.getUserId(),attraction,new Date()));
 			rewardsService.calculateRewards(user);
 			assertTrue(user.getUserRewards().size() > 0);

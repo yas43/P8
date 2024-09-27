@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
 
@@ -35,6 +37,14 @@ public class TestRewardsService {
 		Attraction attraction = gpsUtil.getAttractions().get(0);
 		user.addToVisitedLocations(new VisitedLocation(user.getUserId(), attraction, new Date()));
 		tourGuideService.trackUserLocation(user);
+
+		while (user.getUserRewards().isEmpty()) {
+			try {
+				TimeUnit.MILLISECONDS.sleep(200);
+			} catch (InterruptedException e) {
+
+			}
+		}
 		List<UserReward> userRewards = user.getUserRewards();
 		tourGuideService.tracker.stopTracking();
 		assertTrue(userRewards.size() == 1);
@@ -50,30 +60,20 @@ public class TestRewardsService {
 
 //	@Disabled // Needs fixed - can throw ConcurrentModificationException
 	@Test
-	public void nearAllAttractions() {
+	public void nearAllAttractions() throws ExecutionException, InterruptedException {
 		GpsUtil gpsUtil = new GpsUtil();
 		RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
 		rewardsService.setProximityBuffer(Integer.MAX_VALUE);
 
 		InternalTestHelper.setInternalUserNumber(1);
 		TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
-		System.out.println("after  TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);");
 
-//		System.out.println("inside test tourGuideService.getAllUsers is "+tourGuideService.getAllUsers().size());
-//		tourGuideService.getAllUsers().stream().forEach(u-> {
-//			System.out.println("inside est user.getVisitedLocation is: "+u.getVisitedLocations());
-//			System.out.println("inside est user.getUserReward is: "+u.getUserRewards());
-//		});
-
-
-		rewardsService.calculateRewards(tourGuideService.getAllUsers().get(0));
+		rewardsService.calculateRewards(tourGuideService.getAllUsers().get(0)).get();
 
 		List<UserReward> userRewards = tourGuideService.getUserRewards(tourGuideService.getAllUsers().get(0));
 		tourGuideService.tracker.stopTracking();
-//		System.out.println("userRewardSize  after tourGuideService.getUserRewards(tourGuideService.getAllUsers().get(0)) is "
-//				+tourGuideService.getAllUsers().get(0).getUserRewards().size());
-//		System.out.println("gpsUtil.getattraction size is "+gpsUtil.getAttractions().size());
-
+//		gpsUtil.getAttractions().stream().forEach(r-> System.out.println("attraction names"+r.attractionName));
+//		userRewards.stream().forEach(r-> System.out.println("userrewards attraction "+r.attraction.attractionName+"  visitedlocation:"+r.visitedLocation+"   rewardpoint"+r.getRewardPoints()));
 		assertEquals(gpsUtil.getAttractions().size(), userRewards.size());
 	}
 
