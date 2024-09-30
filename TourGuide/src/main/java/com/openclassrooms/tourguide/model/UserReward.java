@@ -29,16 +29,4 @@ public class UserReward {
 		return rewardPoints;
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		UserReward that = (UserReward) o;
-		return attraction.equals(that.attraction);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(attraction);
-	}
 }
