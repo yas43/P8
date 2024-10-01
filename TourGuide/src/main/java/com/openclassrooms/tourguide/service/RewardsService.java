@@ -41,23 +41,39 @@ public class RewardsService {
 	}
 	
 	public void calculateRewards(User user) {
-//		return
-//				CompletableFuture.runAsync(()-> {
+////		return
+////				CompletableFuture.runAsync(()-> {
+//		List<VisitedLocation> userLocations = user.getVisitedLocations();
+//		List<Attraction> attractions = gpsUtil.getAttractions();
+//			for (VisitedLocation visitedLocation : userLocations) {
+//				for (Attraction attraction : attractions) {
+//				if (user.getUserRewards()
+//						.stream()
+////						.peek(r-> System.out.println("r is : "+ r.attraction.attractionName))
+//						.filter(r -> r.attraction.attractionName.equals(attraction.attractionName)).count()==0) {
+//					if (nearAttraction(visitedLocation, attraction)) {
+//						user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
+//					}
+//				}
+//
+//				}
+//			}
+//
+////		},service);
+
 		List<VisitedLocation> userLocations = user.getVisitedLocations();
 		List<Attraction> attractions = gpsUtil.getAttractions();
-			for (VisitedLocation visitedLocation : userLocations) {
-				for (Attraction attraction : attractions) {
-//			synchronized (this) {
-				if (user.getUserRewards().stream().filter(r -> r.attraction.attractionName.equals(attraction.attractionName)).count()==0) {
+
+		userLocations.parallelStream().forEach(visitedLocation -> {
+			attractions.parallelStream().forEach(attraction -> {
+				if (user.getUserRewards().stream()
+						.noneMatch(r -> r.attraction.attractionName.equals(attraction.attractionName))) {
 					if (nearAttraction(visitedLocation, attraction)) {
 						user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
 					}
 				}
-//			}
-				}
-			}
-
-//		},service);
+			});
+		});
 	}
 	
 	public boolean isWithinAttractionProximity(Attraction attraction, Location location) {
