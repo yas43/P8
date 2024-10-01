@@ -9,6 +9,10 @@ import com.openclassrooms.tourguide.model.UserReward;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -34,6 +38,7 @@ public class TourGuideService {
 	public final Tracker tracker;
 	private final RewardCentral rewardsCentral = new RewardCentral();
 	boolean testMode = true;
+	private final ExecutorService executorService = Executors.newFixedThreadPool(2);
 
 	public TourGuideService(GpsUtil gpsUtil, RewardsService rewardsService) {
 		this.gpsUtil = gpsUtil;
@@ -57,9 +62,19 @@ public class TourGuideService {
 	}
 
 	public VisitedLocation getUserLocation(User user) {
-		VisitedLocation visitedLocation = (user.getVisitedLocations().size() > 0) ? user.getLastVisitedLocation()
-				: trackUserLocation(user);
-		return visitedLocation;
+//		VisitedLocation visitedLocation = (user.getVisitedLocations().size() > 0) ? user.getLastVisitedLocation()
+//				: trackUserLocation(user);
+//
+		if (user.getVisitedLocations().isEmpty()) {
+			try {
+				return trackUserLocation(user).get();
+			} catch (InterruptedException | ExecutionException e) {
+				e.printStackTrace();
+				return null;
+			}
+		} else {
+			return user.getLastVisitedLocation();
+		}
 	}
 
 	public List<NearByAttraction> getNearByAttraction(User user) {
@@ -109,11 +124,18 @@ public class TourGuideService {
 		return providers;
 	}
 
-	public VisitedLocation trackUserLocation(User user) {
-		VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
-		user.addToVisitedLocations(visitedLocation);
-		rewardsService.calculateRewards(user);
-		return visitedLocation;
+	public CompletableFuture<VisitedLocation> trackUserLocation(User user) {
+//		VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
+//		user.addToVisitedLocations(visitedLocation);
+//		rewardsService.calculateRewards(user);
+//		return visitedLocation;
+
+		return CompletableFuture.supplyAsync(() -> {
+			VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
+			user.addToVisitedLocations(visitedLocation);
+			rewardsService.calculateRewards(user);
+			return visitedLocation;
+		}, executorService);
 	}
 
 	public List<Attraction> getNearByAttractions(VisitedLocation visitedLocation) {
